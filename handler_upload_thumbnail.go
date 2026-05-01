@@ -90,8 +90,8 @@ func (cfg *apiConfig) handlerUploadThumbnail(w http.ResponseWriter, r *http.Requ
 	}
 	defer newFile.Close()
 
-	var newURL string = fmt.Sprintf("/%s/%s.%s", cfg.assetsRoot, videoID, fileExtension)
-
+	var newURL string = fmt.Sprintf("http://localhost:8091/%s/%s.%s", cfg.assetsRoot, videoID, fileExtension)
+	fmt.Printf("new thumbnail URL: %s\n", newURL)
 	metadata.ThumbnailURL = &newURL
 
 	_, err = io.Copy(newFile, file)
