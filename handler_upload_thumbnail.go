@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -82,7 +84,10 @@ func (cfg *apiConfig) handlerUploadThumbnail(w http.ResponseWriter, r *http.Requ
 		respondWithError(w, http.StatusBadRequest, "Unsupported media type", nil)
 		return
 	}
-	var newPath string = filepath.Join(cfg.assetsRoot, fmt.Sprintf("%s.%s", videoID, fileExtension))
+	var thumbnailIdRawData [32]byte
+	rand.Read(thumbnailIdRawData[:])
+	thumbnailId := base64.RawURLEncoding.EncodeToString(thumbnailIdRawData[:])
+	var newPath string = filepath.Join(cfg.assetsRoot, fmt.Sprintf("%s.%s", thumbnailId, fileExtension))
 	newFile, err := os.Create(newPath)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "error creating the thumbnail file", err)
@@ -90,7 +95,7 @@ func (cfg *apiConfig) handlerUploadThumbnail(w http.ResponseWriter, r *http.Requ
 	}
 	defer newFile.Close()
 
-	var newURL string = fmt.Sprintf("http://localhost:8091/%s/%s.%s", cfg.assetsRoot, videoID, fileExtension)
+	var newURL string = fmt.Sprintf("http://localhost:8091/%s/%s.%s", cfg.assetsRoot, thumbnailId, fileExtension)
 	fmt.Printf("new thumbnail URL: %s\n", newURL)
 	metadata.ThumbnailURL = &newURL
 
